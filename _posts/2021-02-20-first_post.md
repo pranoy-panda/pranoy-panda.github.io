@@ -10,4 +10,6 @@
 At this point it might not be clear how doing the above solves the issue that we had, but it does and we will see how soon.
 
 **Methodology in detail**:
-
+$$
+\mathcal{X}=\mathcal{X}_{1} \times \ldots \times \mathcal{X}_{d}
+$$
