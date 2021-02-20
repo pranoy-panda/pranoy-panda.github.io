@@ -11,6 +11,18 @@ At this point it might not be clear how doing the above solves the issue that we
 
 **Methodology in detail**:
 
+Let $$\mathcal{X}$$ be a $$d$$-dimensional feature space,
+
 $$
 \mathcal{X}=\mathcal{X}_{1} \times \ldots \times \mathcal{X}_{d}
 $$
+
+and $$\mathcal{Y}$$ be a discrete label space,
+
+$$
+\mathcal{Y}=\{1, \ldots, c\}
+$$
+
+Let $$ \mathbf{X}=\left(X_{1}, \ldots, X_{d}\right) \in \mathcal{X} $$ and $$\mathbf{Y} \in \mathcal{Y}$$ be random variables with joint p.m.f.(or p.d.f.) be $$p$$ and marginal p.m.f.(or p.d.f.) be $$p_X$$ and $$p_Y$$ respectively.
+
+
