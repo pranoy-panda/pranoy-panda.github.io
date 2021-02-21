@@ -103,6 +103,11 @@ $$
 
 To get more clarity into how the different pieces fit together, have a look at the block diagram at the start of this section.
 
+The psuedocode for the INVASE alogrithm is given below where we can see that the three networks(selector, predictor and baseline) are trained iteratively untill convergence.
+
+![](/images/psuedocode_invase.png)
+*Taken from the INVASE[1] paper*
+
 **Results**
 
 For the sake of nice visualization, I have shown below the results of INVASE for computer vision i.e. classification on [Kaggle Dogs vs. Cats dataset](https://www.kaggle.com/c/dogs-vs-cats).
