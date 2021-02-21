@@ -61,11 +61,12 @@ $$
 Now, if you notice, our loss function has some distributions( $$p_Y(y\vert\mathbf{x})$$ and $$p_Y(y \vert \mathbf{x}^{S(\mathbf(x))})$$ ) which we do not know. So, to solve this issue the authors use an actor-critique framework to estimate these distributions.
 
 The authors introduce a pair of functions:
+
 $$
 \begin{array}{l}
 f^{\phi}: \mathcal{X}^{*} \times\{0,1\}^{d} \rightarrow[0,1] \\
 f^{\gamma}: x \rightarrow[0,1]^{c} \\
-\qquad f^{\phi} \text { will estimate } P_{y}\left(\cdot \mid x^{(s(x))}\right) \text { \& } \\
+\qquad f^{\phi} \text { will estimate } P_{y}\left(\cdot \mid x^{(s(x))}\right)\\
 f^{\gamma} \text { will estimate } p_{y}(\cdot \mid x)
 \end{array}
 $$
