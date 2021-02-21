@@ -25,7 +25,7 @@ $$
 
 Let $$ \mathbf{X}=\left(X_{1}, \ldots, X_{d}\right) \in \mathcal{X} $$ and $$\mathbf{Y} \in \mathcal{Y}$$ be random variables with joint p.m.f.(or p.d.f.) be $$p$$ and marginal p.m.f.(or p.d.f.) be $$p_X$$ and $$p_Y$$ respectively.
 
-Let $$ \mathbf{s} \in\{0,1\}^{d} $$ be the selection vector, where if $$s_i=1$$ that means $$i^{th}$$ feature is selected, else if $$s_i=0$$ then the $$i^{th}$$ is not selected. Let $$∗$$ be any point not in any of the spaces $$\mathcal{X_1} , ..., \mathcal{X_d}$$ and define $$\mathcal{X}^{*}_{i} = \mathcal{X}_i \union {∗}$$ and $$\mathcal{X}^{∗} = \mathcal{X}^{*}_{1} \cross ... \cross \mathcal{X}^{*}_{d}$$ . Given $$x \in \mathcal{X}$$ we will write $$x^{(s)}$$ to denote the suppressed feature vector defined by 
+Let $$ \mathbf{s} \in\{0,1\}^{d} $$ be the selection vector, where if $$s_i=1$$ that means $$i^{th}$$ feature is selected, else if $$s_i=0$$ then the $$i^{th}$$ is not selected. Let $$∗$$ be any point not in any of the spaces $$\mathcal{X_1} , ..., \mathcal{X_d}$$ and define $$\mathcal{X}^{*}_{i} = \mathcal{X}_i \cup {∗}$$ and $$\mathcal{X}^{∗} = \mathcal{X}^{*}_{1} \times ... \times \mathcal{X}^{*}_{d}$$ . Given $$x \in \mathcal{X}$$ we will write $$x^{(s)}$$ to denote the suppressed feature vector defined by 
 
 $$
 x_{i}^{(\mathbf{s})}=\left\{\begin{array}{l}
