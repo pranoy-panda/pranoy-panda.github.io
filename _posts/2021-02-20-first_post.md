@@ -49,6 +49,28 @@ $$
 
 where $$\| · \|$$ simply denotes the number of non-zero entries of a vector and $$\lambda$$ is a hyper-parameter for tradeoff between distributional similarity and number of features being selected.
 
+Let the KL divergence term be denoted as $$l(x,S(x))$$ or $$l(x,s)$$ and after a bit of simplification,
+$$
+l(\mathbf{x}, \mathbf{s})=\int_{\mathcal{Y}} p_{Y}(y \mid \mathbf{x})\left[\log \left(p_{Y}(y \mid \mathbf{x})\right)-\log \left(p_{Y}\left(y \mid \mathbf{x}^{(s)}\right)\right)\right] d y
+$$
+So, our loss function can be re-written as:
+$$
+\mathcal{L}(S)=\mathbb{E}_{\mathbf{x} \sim p_{X}}[l(\mathbf{x}, S(\mathbf{x}))+\lambda\|S(\mathbf{x})\|]
+$$
 
+Now, if you notice, our loss function has some distributions($$p_Y(y\vert\mathbf{x}$$ and $$p_Y(y\vert\mathbf{x}^{S(\mathbf(x))}$$) which we are do not know. So, to solve this issue the authors use an actor-critique framework to estimate these distributions.
 
+$$
+\begin{array}{l}
+\text { The authors introduce a pair of functions} f^{\phi}: \mathcal{X}^{*} \times\{0,1\}^{d} \rightarrow[0,1] \\
+f^{\gamma}: x \rightarrow[0,1]^{c} \\
+\qquad f^{\phi} \text { will estimate } P_{y}\left(\cdot \mid x^{(s(x))}\right) \text { \& } \\
+f^{\gamma} \text { will estimate } p_{y}(\cdot \mid x)
+\end{array}
+$$
+
+$$f^{\phi}$$ is called the predictor network and $$f^{\gamma}$$ is called the baseline network. Now by using these two networks, they estimate the KL divergence term($$l(x,s)$$) in the original loss equation by $$\hat{l}(x,s)$$ which is defined as follows(for fixed $$\phi$$ and $$\gamma$$):
+$$
+\hat{l}(\mathbf{x}, \mathbf{s})=-\left[\sum_{i=1}^{c} y_{i} \log \left(f_{i}^{\phi}\left(\mathbf{x}^{(\mathbf{s})}, \mathbf{s}\right)\right)-\sum_{i=1}^{c} y_{i} \log \left(f_{i}^{\gamma}(\mathbf{x})\right)\right]
+$$
 
