@@ -113,6 +113,7 @@ The psuedocode for the INVASE alogrithm is given below where we can see that the
 
 For the sake of nice visualization, I have shown below the results of INVASE for computer vision i.e. classification on [Kaggle Dogs vs. Cats dataset](https://www.kaggle.com/c/dogs-vs-cats).
 ![](/images/result_invase.png)
+*Taken from the INVASE[1] paper*
 
 **References**
 1. Yoon J, Jordon J, van der Schaar M. INVASE: Instance-wise variable selection using neural networks. InInternational Conference on Learning Representations 2018 Sep 27.
