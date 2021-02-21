@@ -88,7 +88,7 @@ $$
 Another issue with feature selection problems is the exponentially large selection space. So, to deal with that the selector network induces a probability distribution over the selection space($$\{0,1\}^{d}$$). The joint probability distribution(or the policy) is given as follows:
 
 $$
-\pi_{\theta}(x, s)=\prod_{i=1}^{d} \hat{S}_{i}^{\theta}(x)^{x_{i}}\left(1-\hat{S}_{i}^{\theta}(x)\right)^{1-s_i}
+\pi_{\theta}(x, s)=\prod_{i=1}^{d} \hat{S}_{i}^{\theta}(x)^{s_{i}}\left(1-\hat{S}_{i}^{\theta}(x)\right)^{1-s_i}
 $$
 
 here, $$\hat{S}^{\theta}$$ is the neural network used to approximate the selector function. $$\hat{S}_{i}^{\theta}$$ represents the probability with which we select the $$i^{th}$$ feature.
