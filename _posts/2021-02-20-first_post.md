@@ -66,8 +66,8 @@ $$
 \begin{array}{l}
 f^{\phi}: \mathcal{X}^{*} \times\{0,1\}^{d} \rightarrow[0,1] \\
 f^{\gamma}: x \rightarrow[0,1]^{c} \\
-\qquad f^{\phi} \text { will estimate } P_{y}\left(\cdot \mid x^{(s(x))}\right)\\
-f^{\gamma} \text { will estimate } p_{y}(\cdot \mid x)
+f^{\phi} \text { will estimate } p_{Y}\left(\cdot \mid x^{(s(x))}\right)\\
+f^{\gamma} \text { will estimate } p_{Y}(\cdot \mid x)
 \end{array}
 $$
 
