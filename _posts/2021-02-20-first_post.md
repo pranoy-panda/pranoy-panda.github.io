@@ -58,19 +58,38 @@ $$
 \mathcal{L}(S)=\mathbb{E}_{\mathbf{x} \sim p_{X}}[l(\mathbf{x}, S(\mathbf{x}))+\lambda\|S(\mathbf{x})\|]
 $$
 
-Now, if you notice, our loss function has some distributions($$p_Y(y\vert\mathbf{x}$$ and $$p_Y(y\vert\mathbf{x}^{S(\mathbf(x))}$$) which we are do not know. So, to solve this issue the authors use an actor-critique framework to estimate these distributions.
+Now, if you notice, our loss function has some distributions( $$p_Y(y\vert\mathbf{x})$$ and $$p_Y(y \vert \mathbf{x}^{S(\mathbf(x))})$$ ) which we do not know. So, to solve this issue the authors use an actor-critique framework to estimate these distributions.
 
+The authors introduce a pair of functions:
 $$
 \begin{array}{l}
-\text { The authors introduce a pair of functions} f^{\phi}: \mathcal{X}^{*} \times\{0,1\}^{d} \rightarrow[0,1] \\
+f^{\phi}: \mathcal{X}^{*} \times\{0,1\}^{d} \rightarrow[0,1] \\
 f^{\gamma}: x \rightarrow[0,1]^{c} \\
 \qquad f^{\phi} \text { will estimate } P_{y}\left(\cdot \mid x^{(s(x))}\right) \text { \& } \\
 f^{\gamma} \text { will estimate } p_{y}(\cdot \mid x)
 \end{array}
 $$
 
-$$f^{\phi}$$ is called the predictor network and $$f^{\gamma}$$ is called the baseline network. Now by using these two networks, they estimate the KL divergence term($$l(x,s)$$) in the original loss equation by $$\hat{l}(x,s)$$ which is defined as follows(for fixed $$\phi$$ and $$\gamma$$):
+$$f^{\phi}$$ is called the predictor network and $$f^{\gamma}$$ is called the baseline network. Now by using these two networks, they estimate the KL divergence term( $$l(x,s)$$ ) in the original loss equation by $$\hat{l}(x,s)$$ which is defined as follows(for fixed $$\phi$$ and $$\gamma$$):
+
 $$
 \hat{l}(\mathbf{x}, \mathbf{s})=-\left[\sum_{i=1}^{c} y_{i} \log \left(f_{i}^{\phi}\left(\mathbf{x}^{(\mathbf{s})}, \mathbf{s}\right)\right)-\sum_{i=1}^{c} y_{i} \log \left(f_{i}^{\gamma}(\mathbf{x})\right)\right]
+$$
+
+*Dealing with a large selection space*: Another issue with feature selection problems is the exponentially large selection space. So, to deal with that the selector network induces a probability distribution over the selection space($$\{0,1\}^{d}$$). The joint probability distribution(or the policy) is given as follows:
+
+$$
+\pi_{\theta}(x, s)=\prod_{i=1}^{d} \hat{S}_{i}^{\theta}(x)^{x_{i}}\left(1-\hat{S}_{i}^{\theta}(x)\right)^{1-s_i}
+$$
+
+here, $$\hat{S}^{\theta}$$ is the neural network used to approximate the selector function. $$\hat{S}_{i}^{\theta}$$ represents the probability with which we select the $$i^{th}$$ feature.
+
+Finally, the loss of the selector function is defined as follows(with approximations for distributions we donot know):
+
+$$
+\begin{aligned}
+l(\theta) &=\mathbb{E}_{(\mathbf{x}, y) \sim p}\left[\mathbb{E}_{\mathbf{s} \sim \pi_{\theta}(\mathbf{x}, \cdot)}\left[\hat{l}(\mathbf{x}, \mathbf{s})+\lambda\|\mathbf{s}\|_{0}\right]\right] \\
+&=\int_{\mathcal{X} \times \mathcal{Y}} p(\mathbf{x}, y)\left(\sum_{\mathbf{s} \in\{0,1\}^{d}} \pi_{\theta}(\mathbf{x}, \mathbf{s})\left(\hat{l}(\mathbf{x}, \mathbf{s})+\lambda\|\mathbf{s}\|_{0}\right)\right) d x d y
+\end{aligned}
 $$
 
