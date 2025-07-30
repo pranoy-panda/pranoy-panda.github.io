@@ -1,0 +1,179 @@
+#Bootstrapping Intelligence: Self-Improving Systems for Open-Ended Discovery
+
+**Author**: Pranoy Panda
+
+In the quest for Artificial General Intelligence (AGI), we often focus on scaling up models with ever-larger datasets. While this "bitter lesson" [0] has proven immensely powerful, it relies on a static, human-curated world of information. But what happens when we need an AI that can thrive in the unknown, solve problems that have never been seen before, and generate its own knowledge? The answer lies not just in bigger models, but in building smarter, self-improving *systems*. This is the core premise of **Open-Ended Discovery**: creating autonomous ecosystems where intelligent agents and the challenges they face evolve together, bootstrapping their complexity and capabilities in a never-ending cycle of innovation.
+
+This blog post explores how we can move beyond static training and architect such a system. We will start by formalizing what "open-endedness" means, and then dive into a concrete experimental testbed I built - a miniature self-improving system that autonomously discovers and masters the complex world of regular expressions: the formal language used to define and find specific patterns within text.
+
+**Table of Contents**
+* [Formalizing Open-Endedness: A Systems-Oriented Formulation](#formalizing-open-endedness-a-systems-oriented-formulation)
+* [Unified view of the Algorithms for Open-ended discovery](#unified-view-of-the-algorithms-for-open-ended-discovery)
+* [Experimental Testbed: Autonomous Curriculum Generation in Formal Languages](#experimental-testbed-autonomous-curriculum-generation-in-formal-languages)
+
+## Formalizing Open-Endedness: A Systems-Oriented Formulation
+
+The term "open-ended" can feel vague, so let's ground it in a robust definition. Drawing from work by Hughes et al. [1], we can define an open-ended system as one that can indefinitely generate artifacts that are **novel and learnable**. Novelty ensures the presence of information gain within the system, while learnability guarantees that this information gain holds meaning and is "interesting" - only one is not enough for perpetual self-improvement.
+
+What does this mean in practice? Imagine a video game where an AI learns to play.
+
+*   A **non-open-ended system** would be an AI that masters a single, fixed level. It might get very good, but its knowledge is confined to that static environment.
+*   An **open-ended system**, by contrast, would involve two AIs: a **Player** and a **Game Designer**.
+    1.  The Player learns to beat the levels created by the Designer.
+    2.  Once the Player succeeds, the Designer analyzes the Player's strategy and creates a *new* level specifically designed to challenge that strategy.
+    3.  This forces the Player to learn a new skill, which in turn inspires the Designer to create an even more complex level.
+
+This co-evolutionary loop can, in principle, continue forever, generating an endless stream of novel levels (environments) and novel playing skills (agents) that did not exist before. The system is constantly surprising itself.
+
+## Algorithms for Open-Ended Discovery
+
+While the field of open-ended discovery is broad, a closer look reveals a shared mathematical and philosophical backbone. Nearly all of these methods can be understood as different strategies for navigating a vast search space to perpetually generate novelty. We can formalize this with a unified framework.
+
+Let's define a system by a few core components:
+
+*   **A solution space** $\Theta$, which contains all possible individuals or solutions, $\theta$. In robotics, it might be the weights of a neural network controller.
+*   **An environment space** $\Epsilon$, which contains all possible tasks or environments, $\epsilon$. In robotics, it might be the morphology of a terrain.
+*   **A performance function** $f(\theta, \epsilon) \rightarrow \mathbb{R}$, which returns a scalar value for how well solution $\theta$ performs in environment $\epsilon$. This is the traditional "fitness" or "reward."
+*   **A behavior characterization function** $b(\theta, \epsilon) \rightarrow \mathbb{R}^d$, which maps a solution's behavior in an environment to a $d$-dimensional vector. This vector describes *how* the solution behaves, not just how *well*. For a robot, it might be its final x/y position and velocity.
+*   **An archive** $\mathcal{A}$, which is a data structure that stores a collection of discovered solutions and/or environments.
+
+At each time step $t$, all open-ended algorithms perform some variation of the following three steps:
+
+1.  **Generation:** Create a new candidate solution $\theta_{new}$ and/or a new environment $\epsilon_{new}$. This is usually done by selecting one or more "parents" from the archive $\mathcal{A}$ and applying a variation operator (e.g., mutation, crossover, or LLM-based prompting).
+2.  **Evaluation:** Assess the new candidate(s) by calculating their performance $f(\theta_{new}, \epsilon_{new})$ and their behavior characterization $b(\theta_{new}, \epsilon_{new})$.
+3.  **Selection:** Decide whether to add the new candidate(s) to the archive $\mathcal{A}$ based on a specific set of rules.
+
+The genius of each named algorithm lies in its unique implementation of these three steps.
+
+### A Spectrum of Discovery Algorithms
+
+We can place these algorithms on a spectrum based on what they prioritize in the **Selection** step.
+
+#### 1. Prioritizing Novelty: `Novelty Search`
+
+This is the simplest form of divergence. Novelty Search [2] completely ignores the performance function $f(\theta, \epsilon)$.
+
+*   The "objective" is to maximize a novelty score, $\mathcal{N}(\theta, \mathcal{A})$. This score is high if the behavior $b(\theta)$ is far from the behaviors of all other individuals currently in the archive $\mathcal{A}$.
+*   **Mathematical Idea:**
+    $\mathcal{N}(\theta, \mathcal{A}) = \frac{1}{k} \sum_{i=1}^{k} \text{dist}(b(\theta), b(\theta_i))$
+    where $\theta_i$ are the $k$-nearest neighbors of $\theta$ in the behavior space within the archive $\mathcal{A}$. The selection rule is simply to add $\theta_{new}$ to $\mathcal{A}$ if $\mathcal{N}(\theta_{new}, \mathcal{A})$ is above a certain threshold.
+
+#### 2. Prioritizing Quality within Diverse Niches: `Quality-Diversity (QD)` and `MAP-Elites`
+
+QD [2] algorithms don't just seek novelty; they seek the *best* possible solution for every *type* of novelty. **MAP-Elites** (Multi-dimensional Archive of Phenotypic Elites) [3] is the archetypal QD algorithm.
+
+*   The archive $\mathcal{A}$ is structured as a grid (a "map"), where each cell corresponds to a discrete region of the behavior space defined by $b(\theta)$. The goal is to place one "elite" solution in each cell.
+*   **Mathematical Idea:** When a new solution $\theta_{new}$ is generated, we find its corresponding cell in the archive, $c = \text{cell}(b(\theta_{new}))$. Let the existing elite in that cell be $\theta_c$. The update rule is:
+    If $f(\theta_{new}, \epsilon) > f(\theta_c, \epsilon)$ or if cell $c$ is empty:
+    $\mathcal{A}[c] \leftarrow \theta_{new}$
+    This simple rule ensures that the archive always contains the highest-performing solutions for a wide variety of behaviors.
+
+#### 3. Co-evolving Agents and Problems: `MCC`, `PAIRED`, and `POET`
+
+This is the next level of complexity, where the environment itself is part of the evolutionary process.
+
+*   **Minimal Criterion Coevolution (MCC)** [4]: This algorithm provides the philosophical foundation. It uses the simplest possible selection rule: a solution $\theta$ survives if it can solve at least one environment $\epsilon$, and an environment $\epsilon$ survives if it can be solved by at least one solution $\theta$. This creates a symbiotic "arms race" that drives the emergence of complexity without needing a direct objective.
+
+*   **PAIRED (Protagonist Antagonist Induced Regret Environment Design)** [5]: This formalizes the arms race into a three-player game to generate maximally informative environments. It involves a *Protagonist* ($\theta_p$) learning to solve problems, an *Antagonist* ($\theta_a$) that is one step ahead, and a *Generator* that creates environments $\epsilon_{new}$ designed to maximize the performance gap (the "regret") between the two.
+    *   **Mathematical Idea:** The generator's objective is to find $\epsilon_{new} = \arg\max_{\epsilon} [f(\theta_a, \epsilon) - f(\theta_p, \epsilon)]$. This forces the generation of problems that are "on the frontier" of the protagonist's abilities.
+
+*   **POET (Paired Open-Ended Trailblazer)** [6]: This is perhaps the most famous co-evolutionary system. It maintains a population of paired agents and environments, $(\theta, \epsilon)$. It introduces two key mechanisms:
+    1.  **Environment Generation:** New environments $\epsilon_{new}$ are generated by mutating existing ones in the archive. They are only kept if they are "not too easy, not too hard" for the current population of agents.
+    2.  **Goal-Switching (Transfer):** Periodically, every agent $\theta_i$ is tested against every environment $\epsilon_j$. If an agent designed for one environment happens to be a better "stepping stone" for solving another, its weights are transferred, catalyzing progress. The **LLM-POET** [7] variant simply uses an LLM as a powerful mutation operator for creating new, complex environments.
+
+#### 4. LLM-Driven Autonomous Agents: `Go-Explore` and `Voyager`
+
+These recent approaches leverage the power of Large Language Models (LLMs) to guide the discovery process, often in complex, embodied domains like video games.
+
+*   **Go-Explore** [8] The core insight is to decouple exploration from robustification.
+    1.  **Explore Phase:** The first goal is to reach novel states. It maintains an archive of cells, where a cell is a compressed representation of a game state. It repeatedly chooses a promising cell from the archive, *returns* to that exact state (e.g., by loading a save state), and then explores randomly from there. A new state is added to the archive if it corresponds to a new, unseen cell.
+    2.  **Robustify Phase:** Once a trajectory that solves the task is found, imitation learning is used to train a robust policy that can replicate that solution without needing to load save states. **Intelligent Go-Explore** [9] extends this by using an LLM to decide which cells in the archive are most "interesting" or "promising" to explore from, replacing hand-coded heuristics.
+
+*   **Voyager** [10] This is an LLM-powered agent designed for lifelong learning in open-ended worlds like Minecraft. It integrates several of the concepts above into a single agent architecture:
+    1.  **Automatic Curriculum:** An LLM acts as a high-level explorer, proposing new goals that maximize exploration (e.g., "find a desert" or "craft a stone pickaxe"). This is analogous to the Generator in POET.
+    2.  **Skill Library (The Archive):** It builds an ever-growing library of executable code snippets (skills). When faced with a task, it retrieves relevant skills from this library using vector similarity - a direct implementation of the k-NN approach we added to our solver.
+    3.  **Iterative Prompting:** It uses a self-correction loop where the LLM writes code, receives feedback from the game (execution errors, success/failure), and refines the code, similar to our `debug_problem` function.
+
+By viewing these algorithms through this unified lens, we can see they are all wrestling with the same fundamental trade-off: how to balance the exploitation of known, high-performing solutions with the exploration of novel possibilities. Crucially, this exploration is not just a search for better agents, but a search for *better challenges*. The generation of evolving challenges is the engine that drives discovery. A system that only seeks to improve its solutions against a static problem will eventually plateau.
+
+## Experimental Testbed: Autonomous Curriculum Generation in Formal Languages
+
+To put these ideas into practice, I built a system called the **"AI Regex Scientist."** The goal was to create a microcosm of discovery where the system could autonomously invent, solve, and master challenges in a formal, verifiable domain: regular expressions.
+
+The system consists of two core LLM-powered agents (`gemini-2.0-flash`) operating in a closed loop:
+
+1.  **Environment Generator Agent (The regex problem generator):** This agent's role is to invent new environments. Here, each environment is a regex problem with varying length and complexity. It doesn't just create random puzzles; it analyzes the Solver's past performance-both its successes and failures-to generate a new challenge that is tailored to the Solver's current skill level.
+
+2.  **Solver Agent (The regex problem solver):** This agent's goal is to write a correct regular expression for the problem posed by the Generator. To help it improve, it is given few-shot examples from its own past successes, selected for their semantic similarity to the new problem via a k-NN vector search - a popular in-context learning strategy with LLMs. Furthermore, the agent gets to attempt each regex problem for more than one time to give it a fair shot and to learn from previous errors.
+
+Two critical components govern the interaction between the environment generator and the agent: an Evaluation Harness that acts as the "laws of physics," providing instant, objective ground truth on whether a solution is correct, and a Quality-Diversity Archive that maintains a map of all successfully solved problem types, pushing the system to explore broadly rather than just climbing a single hill of difficulty.
+
+This dynamic 'tussle' between the agents is best understood visually. The following chart plots task complexity against time, showing not just a steady climb, but a process of ambitious exploration, failure, and intelligent adaptation:
+
+
+![](/images/regex_progression.svg)
+
+The result is a dynamic, self-correcting learning process. The Generator pushes the Solver by creating harder tasks, and the Solver's performance (or lack thereof) informs the Generator on what to create next. This co-evolution allows the system to navigate a "zone of proximal development," ensuring the challenges are never too easy and never impossible.
+
+However, open-ended discovery isn't just about becoming progressively harder; it's also about becoming broader. Thanks to the Quality-Diversity archive, the system doesn't just fixate on one type of problem. It actively seeks to map out the wider "problem space." The result is a rich tapestry of challenges, where the generator learns to create problems targeting different concepts and styles, as seen in the variety of outputs from the final archive:
+
+![](/images/generator_outputs.svg)
+
+Tying this all together is the system's architecture, which orchestrates the flow of information between the agents and their memory stores in a continuous cycle of discovery:
+
+![Architecture](/images/architecture.svg)
+
+I have open-sourced the code for this system [here](https://github.com/pranoy-panda/open-ended-discovery), in case anyone wants to play with it.
+
+## Conclusion and Future Directions
+The "AI Regex Scientist" testbed serves as a simple microcosm, providing a foundational proof of concept that demonstrates the principles of co-evolution and quality-diversity can be orchestrated to create an autonomous system that discovers and learns in a non-trivial domain. While this is a rudimentary example, it highlights a path forward for building more sophisticated discovery engines.
+
+The field of open-ended discovery is, in my view, at an exciting inflection point. The advent of powerful Large Language Models, which can act as reasoning engines, creative generators, and semantic search tools, provides an unprecedented toolkit to build and scale these ecosystems beyond formal languages and into the exciting realms of scientific hypothesis generation.
+
+This work is a personal exploration, and the field is moving quickly. If you spot any errors in my reasoning, bugs in the logic, or have ideas for extensions, I would be delighted to hear from you.
+
+Thanks for reading!
+
+## Citation
+If you found this blog useful, please cite this work as 
+
+```
+Panda, Pranoy. "Bootstrapping Intelligence: Self-Improving Systems for Open-Ended Discovery" (Blog, July 2025).
+```
+
+Or use the BibTeX citation:
+
+```
+@article{Panda2025bootstrap,
+  title = {Bootstrapping Intelligence: Self-Improving Systems for Open-Ended Discovery},
+  author = {Panda, Pranoy},
+  journal = {pranoy-panda.github.io},
+  year = {2025},
+  month = {July},
+  url = "https://pranoy-panda.github.io/open_ended_discovery_reg_exprs.html"
+}
+```
+
+## References
+
+[0] Sutton, Richard. "The bitter lesson." Incomplete Ideas (blog) 13.1 (2019): 38.
+
+[1] Hughes et al, Open-Endedness is Essential for Artificial Superhuman Intelligence, ICML 2024.
+
+[2] Lehman and Stanley, Abandoning objectives: Evolution through the search for novelty alone, Evolutionary computation, 2011. 
+
+[3] Mouret and Clune, Illuminating search spaces by mapping elites, 2015.
+
+[4] Brant et al., Minimal criterion coevolution: a new approach to open-ended search, GECCO 2027
+
+[5] Dennis et al., Emergent Complexity and Zero-shot Transfer via Unsupervised Environment Design, 2020
+
+[6] Wang et al., POET: open-ended coevolution of environments and their optimized solutions, GECCO 2019
+
+[7] Aki et al., LLM-POET: Evolving Complex Environments using Large Language Models, 2024
+
+[8] Ecofer et al., Go-Explore: a New Approach for Hard-Exploration Problems, 2019
+
+[9] Lu et al, Intelligent Go-Explore: Standing on the Shoulders of Giant Foundation Models, ICLR 2025
+
+[10] Wang et al., Voyager: An Open-Ended Embodied Agent with Large Language Models, 2023
